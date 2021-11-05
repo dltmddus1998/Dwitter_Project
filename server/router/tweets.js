@@ -3,6 +3,7 @@ import 'express-async-errors';
 import * as tweetController from '../controller/tweet.js';
 import validatorExpress from 'express-validator';
 import { validate } from '../middleware/validator.js';
+import { isAuth } from '../middleware/auth.js';
 
 const { body } = validatorExpress;
 
@@ -20,18 +21,20 @@ const validateTweet = [
 // GET /tweets
 // GET /tweets?username=:username
 // 값이 연결되는 게 아니라 함수를 연결하는 것 -> 함수 호출 x
-router.get('/', tweetController.getTweets);
+
+// tweet에 관련된 것은 모두 로그인한 사람만 할 수 있도록 isAuth 추가
+router.get('/', isAuth, tweetController.getTweets);
 
 // GET /tweets/:id
-router.get('/:id', tweetController.getTweet);
+router.get('/:id', isAuth, tweetController.getTweet);
 
 // POST /tweets
-router.post('/', validateTweet, tweetController.createTweet);
+router.post('/', isAuth, validateTweet, tweetController.createTweet);
 
 // PUT /tweets/:id
-router.put('/:id', validateTweet, tweetController.updateTweet);
+router.put('/:id', isAuth, validateTweet, tweetController.updateTweet);
 
 // DELETE /tweets/:id
-router.delete('/:id', tweetController.deleteTweet);
+router.delete('/:id', isAuth, tweetController.deleteTweet);
 
 export default router;
