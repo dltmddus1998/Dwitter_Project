@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import * as userRepository from '../data/auth.js';
+import { config } from '../config.js';
 
 const AUTH_ERROR = { message: 'Authentication Error' };
 
@@ -11,6 +12,7 @@ export const isAuth = (req, res, next) => {
     // req의 헤더 안에 있는 Authorization이라는 키를 할당해준다.
     const authHeader = req.get('Authorization');
 
+    // console.log(authHeader)
     // authHeader가 없거나 Bearer이 포함되어있지 않을 경우 에러 표시
     if (!(authHeader && authHeader.startsWith('Bearer '))) {
         return res.status(401).json(AUTH_ERROR);
@@ -19,12 +21,13 @@ export const isAuth = (req, res, next) => {
     // authHeader 있는 경우
     // Bearer 다음에 토큰이 있기 때문에 공백을 기준으로 배열로 만들어주고 1번째 요소인 토큰을 할당해준다.
     const token = authHeader.split(' ')[1];
+    // console.log(token)
 
     // verify를 이용해서 토큰이 유효한지 검사해준다.
     // 키부분은 뒤에서 깔끔하게 만들어보자.
     jwt.verify(
         token,
-        'F2dN7x8HVzBWaQuEEDnhsvHXRWqAR63z',
+        config.jwt.secretKey,
         async (error, decoded) => {
             if (error) {
                 return res.status(401).json(AUTH_ERROR);

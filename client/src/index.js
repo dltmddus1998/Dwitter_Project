@@ -8,12 +8,18 @@ import { BrowserRouter } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { AuthErrorEventBus } from './context/AuthContext';
 import HttpClient from './network/http';
+import TokenStorage from './db/token';
+import Socket from './network/socket';
+
 
 const baseURL = process.env.REACT_APP_BASE_URL;
-const httpClient = new HttpClient(baseURL);
+const tokenStorage = new TokenStorage();
 const authErrorEventBus = new AuthErrorEventBus();
-const authService = new AuthService();
-const tweetService = new TweetService(httpClient);
+const httpClient = new HttpClient(baseURL, authErrorEventBus);
+const authService = new AuthService(httpClient, tokenStorage);
+// 콜백함수를 호출하면 업데이트된 최근의 토큰을 받아갈 수 있도록 storage에 있는 토큰을 읽어갈 수 있도록했다. 
+const socketClient = new Socket(baseURL, () => tokenStorage.getToken());
+const tweetService = new TweetService(httpClient, tokenStorage, socketClient);
 
 ReactDOM.render(
   <React.StrictMode>

@@ -16,6 +16,11 @@ const Tweets = memo(({ tweetService, username, addable }) => {
       .getTweets(username)
       .then((tweets) => setTweets([...tweets]))
       .catch(onError);
+
+      // onSync를 통해 새로운 트윗이 생기면 만들어주고
+      // component가 끝날 때 더이상 듣고 싶지 않으므로 받아온 해당 콜백함수를 호출해준다.
+      const stopSync = tweetService.onSync(tweet => onCreated(tweet));
+      return () => stopSync();
   }, [tweetService, username, user]);
 
   const onCreated = (tweet) => {
