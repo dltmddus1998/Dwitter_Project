@@ -1,17 +1,26 @@
-import { db } from '../db/database.js';
+import { getUsers } from '../database/database.js';
+import MongoDb from 'mongodb';
 
+const ObjectId = MongoDb.ObjectId;
 export async function findByUsername(username) {
-    return db.execute('SELECT * FROM users WHERE username=?', [username]).then(result => result[0][0]);
+    return getUsers()
+        .findOne({username})
+        .then(mapOptionalUser);
 }
 
 export async function findById(id) {
-    return db.execute('SELECT * FROM users WHERE id=?', [id]).then(result => result[0][0]);
+    return getUsers()
+        .findOne({ _id: new ObjectId(id) })
+        .then(mapOptionalUser);
 }
 
 export async function createUser(user) {
-    console.log('aaa');
-    const { username, password, name, email, url } = user;
-    return db.execute('INSERT INTO users (username, password, name, email, url) VALUES (?, ?, ?, ?, ?)', [
-        username, password, name, email, url
-    ]).then(result => result[0].insertId);
+    return getUsers()
+        .insertOne(user)
+        .then(data => data.insertedId.toString());
+}
+
+function mapOptionalUser(user) {
+    // 새로운 유저가 있으면 {...user, id: user._id} 로 추가, 없으면 그대로 user 리턴
+    user ? {...user, id: user._id.toString()} : user;
 }
