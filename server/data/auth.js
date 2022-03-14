@@ -11,6 +11,7 @@ export async function findByUsername(username) {
 export async function findById(id) {
     return getUsers()
         .findOne({ _id: new ObjectId(id) })
+        .next()
         .then(mapOptionalUser);
 }
 
